@@ -8,6 +8,7 @@ from models.model_comments import Comments
 from models.model_posts import Posts
 
 from schemas.comments import CommentsCreateModel
+from tools.exceptions import CommentsException
 
 class CommentsService:
     async def crud_add_new_comment_into_post(
@@ -73,7 +74,10 @@ class CommentsService:
         """
         stmt = select(Comments).where(Comments.id == comment_id)
         result = await db.execute(stmt)
-        return result.scalar_one_or_none()
+        comment_obj = result.scalar_one_or_none()
+        if not comment_obj:
+            raise CommentsException()
+        return comment_obj
 
     async def crud_delete_comment_by_comment_id(
             self,

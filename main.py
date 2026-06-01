@@ -2,24 +2,34 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
-from starlette.middleware.cors import CORSMiddleware
 
-from routers import user,posts,comments
+from routers import user,posts,comments,agent
 from config import database_config
 from models import model_base
 import models
-from tools.exceptions import http_exception_handler,db_exception_handler,sqlalchemy_exception_handler,other_exception_handler
+from tools.middleware import register_middleware
+from tools.exceptions import (
+    UserException,
+    PostException,
+    CommentsException,
+    http_exception_handler,
+    db_exception_handler,
+    sqlalchemy_exception_handler,
+    other_exception_handler,
+    post_not_found_error,
+    user_not_found_error,
+    comments_not_found_error
+)
 
-
-# async def init_db() -> None:
-#     async with database_config.async_engine.begin() as conn:
-#         await conn.run_sync(model_base.Base.metadata.create_all)# 我这里第一次写时用成了会话工厂.create_all
 
 def register_exception_handler(fapp):
     fapp.add_exception_handler(HTTPException, http_exception_handler)
     fapp.add_exception_handler(IntegrityError, db_exception_handler)
     fapp.add_exception_handler(SQLAlchemyError, sqlalchemy_exception_handler)
     fapp.add_exception_handler(Exception, other_exception_handler)
+    fapp.add_exception_handler(PostException, post_not_found_error)
+    fapp.add_exception_handler(UserException, user_not_found_error)
+    fapp.add_exception_handler(CommentsException, comments_not_found_error)
 
 
 
@@ -31,15 +41,11 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 # app.lifespan = lifespan
 register_exception_handler(app)
+register_middleware(app)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # *代表所有，允许所有源访问
-    allow_credentials=True,# 允许携带cookie
-    allow_methods=["*"],# 允许所有请求方法
-    allow_headers=["*"],# 允许所有请求头
-)
+
 
 app.include_router(user.router)
 app.include_router(posts.router)
 app.include_router(comments.router)
+app.include_router(agent.router)

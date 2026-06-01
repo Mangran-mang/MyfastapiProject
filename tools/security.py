@@ -1,6 +1,6 @@
 import logging
 
-from passlib.context import CryptContext
+from passlib.context import CryptContext# 密码哈希库
 from datetime import timedelta,datetime
 import jwt
 

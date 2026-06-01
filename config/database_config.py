@@ -1,10 +1,15 @@
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+from config.config import Config
 
-DATABASE_URL = "mysql+aiomysql://root:123456@127.0.0.1:3306/mangran?charset=utf8mb4"
+
+DATABASE_URL = Config.DATABASE_URL
 
 # 数据库引擎
-async_engine = create_async_engine(DATABASE_URL, echo=True,pool_size=10,max_overflow=20)
-
+async_engine = create_async_engine(DATABASE_URL,pool_size=10,max_overflow=20)
+"""
+echo=True是否打印执行的 SQL 语句与参数
+echo_pool打印连接池的创建、获取、回收日志
+"""
 # 会话工厂
 AsyncSessionLocal = async_sessionmaker(
     bind=async_engine,

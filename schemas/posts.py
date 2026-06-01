@@ -22,6 +22,6 @@ class PostsUpdateModel(BaseModel):
     title: Optional[str] = None
     content: Optional[str] = None
     summary: Optional[str] = None
-    is_public: Optional[bool] = True
+    is_public: Optional[bool] = None
 
     model_config = {"from_attributes": True}

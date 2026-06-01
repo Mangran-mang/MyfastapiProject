@@ -1,0 +1,29 @@
+from fastapi import FastAPI
+from fastapi.requests import Request
+import time
+from starlette.middleware.cors import CORSMiddleware
+
+
+def register_middleware(app: FastAPI):
+    """
+    注册中间件
+    """
+    @app.middleware("http")
+    async def custom_loggin(request: Request, call_next):
+        # 进来时先执行call_next以上的代码
+        # ---------- 关键步骤：把请求传给下一个环节 ----------
+        # call_next 是 FastAPI 提供的函数，调用它会把请求传给：
+        # 下一个中间件 → 最后到你的接口路由
+        # 执行完会拿到接口返回的 response
+        response = await call_next(request)
+        message = f"{request.client.host} {request.method} {request.url.path} {response.status_code}"
+        print(message)
+        return  response
+
+    app.add_middleware(  # 设置app可被跨域访问
+        CORSMiddleware,  # 中间件类 跨域中间件
+        allow_origins=["*"],  # *代表所有，允许所有源访问
+        allow_credentials=True,  # 允许携带cookie
+        allow_methods=["*"],  # 允许所有请求方法
+        allow_headers=["*"],  # 允许所有请求头
+    )

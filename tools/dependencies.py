@@ -34,8 +34,8 @@ class TokenBearer(HTTPBearer):
 
         本函数最终返回的是解码后的token
         """
-        creds = await super().__call__(request)
-        token = creds.credentials
+        creds = await super().__call__(request)# 为什么要写个request，是把参数给父类了？
+        token = creds.credentials# creds是什么
         token_data = decode_token(token)
 
         if creds:
@@ -68,7 +68,7 @@ class TokenBearer(HTTPBearer):
 
     def token_valid(self, token_data:Optional[dict]) -> bool:
         """
-        验证令牌数据是否有效
+        验证令牌数据是否为空
         返回True或False
         """
         # token_data = decode_token(token)
